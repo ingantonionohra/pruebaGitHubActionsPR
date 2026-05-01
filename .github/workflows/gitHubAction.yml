@@ -46,9 +46,10 @@ jobs:
             exit 1
           }
 
-          # Regla 1: Nombre de branches válidos
-          if [[ "$head_branch" != "main" && "$head_branch" != "develop" && "$head_branch" != "Testing" && "$head_branch" != "testing" && ! "$head_branch" =~ ^feature[a-zA-Z0-9_-]+$ ]]; then
-            invalid "Las ramas válidas son main, develop, Testing o deben comenzar con 'feature' seguido de un nombre de módulo, por ejemplo feature-usuario o featureCarrito."
+
+          # Regla 1: Nombre de branch feature
+            if [[ ! "$head_branch" =~ ^feature[a-zA-Z0-9_-]+$ ]]; then
+              invalid "Las ramas feature deben llamarse con el prefijo 'feature' seguido de un nombre de módulo, por ejemplo feature-usuario o featureCarrito."
           fi
 
           # Regla 2 y 3: No permitir merge directo de feature a main; sólo a develop o testing
