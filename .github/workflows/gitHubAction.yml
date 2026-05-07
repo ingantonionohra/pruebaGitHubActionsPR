@@ -66,5 +66,4 @@ jobs:
               invalid "La rama testing sólo puede hacer merge a develop. Base actual: $base_branch."
             fi
           fi
-
           echo "Validación completada correctamente."
