@@ -61,7 +61,7 @@ jobs:
           if [[ "$head_branch" != "main" && \
                 "$head_branch" != "develop" && \
                 "$head_branch" != "testing" && \
-                ! "$head_branch" =~ ^feature(/[a-zA-Z0-9][a-zA-Z0-9_-]+|-[a-zA-Z0-9][a-zA-Z0-9_-]+|[A-Z][a-zA-Z0-9_-]+)$ then
+                ! "$head_branch" =~ ^feature(/[a-zA-Z0-9][a-zA-Z0-9_-]+|-[a-zA-Z0-9][a-zA-Z0-9_-]+|[A-Z][a-zA-Z0-9_-]+)$ ]]then
             invalid "Nombre de rama inválido: '$head_branch'. Las ramas deben ser main, develop, testing o seguir uno de estos formatos: feature/Persona, feature-usuario, featureCarrito."
           fi
 
