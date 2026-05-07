@@ -1,33 +1,11 @@
-# name: Aqui se pone el nombre del flujo de trabajo que luego se mostrara en la pestaña de acctions del repositorio
 name: Validar políticas de ramas
-
-# on: Se utiliza para deifinir que eventos pueden hacer que se ejecute el flujo de trabajo, en este caso el flujo de trabajo se ejecuta cuando haces push o un pull_re-
-# quest en cualquier rama.
 
 on:
   pull_request:
     branches:
-      - '**'
-
-# jobs.<job_id>: job_id sirve para asignar un identificador unico al trabajo, en este caso se le dio validar-ramas.
-# jobs.<job_id>.name: Sirve para establecer un nombre para el trabajo, que se muesta en la UI de gitHub.
-# jobs.<job_id>.runs-on: Sirve para definir el tipo de maquina en la que se ejecutara el trabajo, en este caso se ejecutara en ubuntu.
-# jobs.<job_id>.steps: Sirve para definir una secuencia de tareas.
-# jobs.<job_id>.steps[*].id: Permite definir un identificador unico para el paso.
-# jobs.<job_id>.steps[*].run: Permite ejecutar programas de lineas de comandos mediante el shell del sistema operativo y | se utiliza para escribir en varias lineas
-# shell bash: Permite que en el shell de gitHub se ejecute comandos de Linux
-# env: GITHUB_EVENT_PATH: ${{ github.event_path }}: Establece variables para los pasos a utilizar en el entorno de ejecución. También puedes establecer las 
-# variables para todo el flujo de trabajo o para una tarea.
-
-# Variables de entorno githubActions: Estas son variables administrativas que pueden ser utilizadas durante el flujo de trabajo, incluidas las variables de entorno ,las 
-# de configuración y predeterminadas proporcionadas por GitHub, estas son las que se utilizaron:
-# ----------INICIO----------
-# $GITHUB_EVENT_NAME: El nombre del evento que activó el flujo de trabajo. Por ejemplo, workflow_dispatch.
-# $GITHUB_REF: Referencia de formato completo de la rama o etiqueta que desencadenó la ejecución del flujo de trabajo
-# $GITHUB_SHA: El hash del commit que disparó el workflow
-# ${{ github.event_path }} : Es una variable de GitHub Actions que contiene la ruta al archivo JSON que tiene toda la información del evento que disparó el workflow.De-
-# pendiendo del evento, contiene datos como quién hizo el push, qué rama, qué commits, etc.
-# ----------FIN----------
+      - main
+      - develop
+      - testing
 
 jobs:
   validar-ramas:
@@ -46,8 +24,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          head_branch="$(jq -r '.pull_request.head.ref' "$GITHUB_EVENT_PATH")"
-          base_branch="$(jq -r '.pull_request.base.ref' "$GITHUB_EVENT_PATH")"
+          head_branch="$(jq -r '.pull_request.head.ref' "$GITHUB_EVENT_PATH" | tr '[:upper:]' '[:lower:]')"
+          base_branch="$(jq -r '.pull_request.base.ref' "$GITHUB_EVENT_PATH" | tr '[:upper:]' '[:lower:]')"
 
           echo "Head branch: $head_branch"
           echo "Base branch: $base_branch"
@@ -61,12 +39,12 @@ jobs:
           if [[ "$head_branch" != "main" && \
                 "$head_branch" != "develop" && \
                 "$head_branch" != "testing" && \
-                ! "$head_branch" =~ ^feature(/[a-zA-Z0-9][a-zA-Z0-9_-]+|-[a-zA-Z0-9][a-zA-Z0-9_-]+|[A-Z][a-zA-Z0-9_-]+)$ then
-            invalid "Nombre de rama inválido: '$head_branch'. Las ramas deben ser main, develop, testing o seguir uno de estos formatos: feature/Persona, feature-usuario, featureCarrito."
+                ! "$head_branch" =~ ^feature(/[a-z0-9][a-zA-Z0-9_-]+|-[a-z0-9][a-zA-Z0-9_-]+|[a-z][a-zA-Z0-9_-]+)$ ]]; then
+            invalid "Nombre de rama inválido: '$head_branch'. Las ramas deben ser main, develop, testing o seguir uno de estos formatos: feature/nombre (mín. 2 chars), feature-nombre (mín. 2 chars), featureNombre (mín. 2 chars tras el prefijo)."
           fi
 
           # Regla 2 y 3: No permitir merge directo de feature a main; sólo a develop o testing
-          if [[  "$head_branch" =~ ^feature ]]; then
+          if [[ "$head_branch" =~ ^feature ]]; then
             if [[ "$base_branch" == "main" ]]; then
               invalid "No se permite merge directo de una rama feature a main. Debe pasar por develop o testing primero."
             fi
@@ -76,17 +54,17 @@ jobs:
           fi
 
           # Regla 4: Develop sólo puede hacer merge a main
-          if [[  "$head_branch" == "develop" ]]; then
+          if [[ "$head_branch" == "develop" ]]; then
             if [[ "$base_branch" != "main" ]]; then
               invalid "La rama develop sólo puede hacer merge a main. Base actual: $base_branch."
             fi
           fi
 
           # Regla adicional: testing sólo puede hacer merge a develop
-          if [[  "$head_branch" == "testing" ]]; then
+          if [[ "$head_branch" == "testing" ]]; then
             if [[ "$base_branch" != "develop" ]]; then
               invalid "La rama testing sólo puede hacer merge a develop. Base actual: $base_branch."
             fi
           fi
-          
+
           echo "Validación completada correctamente."
