@@ -1,6 +1,5 @@
 name: Validar políticas de ramas
 
-
 on:
   pull_request:
     branches:
